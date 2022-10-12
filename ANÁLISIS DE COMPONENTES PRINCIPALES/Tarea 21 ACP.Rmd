@@ -1,0 +1,117 @@
+---
+title: "Analisis de Componentes Principales: Caracterizacion de las variedades de peces"
+author: "franmarq@gmail.com"
+date: '2022-10-11'
+output: html_document
+---
+
+
+## Tarea 2
+
+Con el data Frame.env del fichero de datos doubs que contiene 10 variables sobre 30 variedades de peces, realizar un ACP para caracterizar las variedades de peces. 
+
+en primer lugar hacemos la lectura de los datos y contruimos el data frame con el cual estaremos trabajando:
+
+
+```{r datos}
+library(ade4)
+data(doubs)
+datosacp <-doubs$env
+head(datosacp,30)
+str(datosacp)
+
+#dudi.pca(df, row.w = rep(1, nrow(df))/nrow(df),col.w = rep(1, ncol(df)),
+#center = TRUE, scale = TRUE,scannf = TRUE, nf = 2)
+
+```
+
+Iniciamos el analisis haciendo un estudio estadistico descriptivo de los datos, los cuales nos permitirán inicialemte tener informacion acerca de la distribución y posibles relacione de las variables. 
+
+Iniciamos obteniendo las estadisticas principales de las variables
+
+
+```{r estad}
+summary(datosacp)
+```
+
+Un recurso interesante es aquel que nos permite la funcion 
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+```{r plot}
+plot(datosacp)
+```
+
+
+```{r plotcor}
+library(GGally)
+ggpairs(datosacp, lower = list(continuous = "smooth"),
+diag = list(continuous = "barDiag"), axisLabels = "none")
+
+```
+
+
+Ahora bien, aplicaremos el análisis de componentes principales utilizando la siguiente función
+
+```{r datosacp}
+datosacp2<-data.frame(datosacp)
+datosacp2
+
+```
+
+
+
+```{r acp}
+
+library(ade4)
+acp<-dudi.pca(df=datosacp2,scannf=T,nf=NA)
+
+```
+
+
+De esta manera generaremos el análisis de componentes principales y a su vez obtenemos la representacion de los autovalores, en la que podemos ver:  que el primero es el mas importante, y tal vez los dos primeros se destacan del resto. 
+es decir, los que mas contribuyen a la explicación de las variables.
+
+Para ver la importancia (contribuciones) absolutas y relativas, vamos a usar la funcion inertia.dudi, que calcula dichas contribuciones:
+
+```{r acp2}
+acpi<-inertia.dudi(acp, row.inertia=T, col.inertia=T)
+acpi
+
+```
+Vemos como el primer eje, explica un 57.47% y los dos primeros el 77.76% de la inercia.
+
+
+Analizando las salidas: 
+
+Estos puntos los podemos representar con la orden s.label de la forma:
+
+```{r salida1}
+s.label(acp$li)
+s.label(acp$co)
+```
+Tambien podemos obtener la representacion conjunta de las y columnas sin mas que:
+
+```{r biplot}
+biplot(acp$co,acp$li)
+```
+
+otros graficos
+
+```{r otrosgraf}
+
+library(corrplot)#para ver la correlacion de las variables
+library(factoextra)
+
+corrplot(cor(datos),sig.level=0.05,typ="lower")
+
+fviz_eig(acp, addlabels = TRUE, ylim = c(0, 85))
+
+fviz_pca_var(acp, col.var = "cos2",
+gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+repel = TRUE # Avoid text overlapping
+)
+```
